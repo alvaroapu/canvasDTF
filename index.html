@@ -974,7 +974,7 @@ function showSuccessModal(){
   const mE=objs.length>0?mb/SC/100:0;
   const mR=objs.length>0?Math.ceil(mE*2)/2:0;
   const cantidad=Math.max(1,mR);
-  const cartUrl='https://dtftextil.es/carrito/?add-to-cart=267&quantity='+cantidad.toFixed(2);
+  const cartUrl='https://dtftextil.es/carrito/?add-to-cart=267&quantity='+cantidad.toFixed(2)+'&metros='+cantidad.toFixed(2).replace('.',',');
   document.getElementById('successCartBtn').href=cartUrl;
   document.getElementById('successModal').classList.add('on');
 }
