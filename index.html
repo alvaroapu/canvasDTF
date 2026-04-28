@@ -165,6 +165,8 @@ body{font-family:var(--font-b);background:#e8e8e8;color:var(--g800);line-height:
 .success-actions .btn{padding:14px 20px;font-size:.88rem}
 .success-actions .s-close{font-size:.75rem;color:var(--g400);cursor:pointer;background:none;border:none;font-family:var(--font-b);margin-top:4px;transition:var(--tr)}
 .success-actions .s-close:hover{color:var(--g700)}
+.btn-beta{position:relative;font-size:.65rem!important}
+.btn-beta::before{content:'BETA';position:absolute;top:-6px;right:4px;background:var(--red);color:var(--white);padding:1px 4px;border-radius:2px;font-weight:700;font-size:.5rem;letter-spacing:.02em}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--black);color:var(--white);padding:10px 22px;border-radius:var(--radius);font-size:.8rem;font-weight:500;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none}
@@ -339,10 +341,11 @@ body{font-family:var(--font-b);background:#e8e8e8;color:var(--g800);line-height:
     </div>
 
     <div class="success-actions">
-      <a href="#" class="btn btn-p" id="successCTA" target="_blank" rel="noopener">
+      <a href="#" class="btn btn-p btn-beta" id="successCartBtn" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-        Ir a la tienda — Comprar bono
+        Añadir al carrito
       </a>
+      <a href="https://dtftextil.es/tienda/dti-por-metros/" class="btn btn-o" target="_blank" rel="noopener" style="width:100%;margin-bottom:8px">Ver producto</a>
       <button class="s-close" id="successClose">Seguir editando el montaje</button>
     </div>
   </div>
@@ -966,8 +969,13 @@ document.getElementById('bExp2').addEventListener('click',doExport);
 
 /* ── Success Modal ── */
 function showSuccessModal(){
-  document.getElementById('successCTA').href=TIENDA_DTI_URL;
-  document.getElementById('successCTA').textContent='Ir a la tienda de impresión DTI';
+  const objs=fc.getObjects().filter(o=>!o._g);
+  let mb=0;objs.forEach(o=>{const b=o.getBoundingRect(true);if(b.top+b.height>mb)mb=b.top+b.height});
+  const mE=objs.length>0?mb/SC/100:0;
+  const mR=objs.length>0?Math.ceil(mE*2)/2:0;
+  const cantidad=Math.max(1,mR);
+  const cartUrl='https://dtftextil.es/carrito/?add-to-cart=267&quantity='+cantidad.toFixed(2);
+  document.getElementById('successCartBtn').href=cartUrl;
   document.getElementById('successModal').classList.add('on');
 }
 
