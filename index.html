@@ -975,8 +975,8 @@ function showSuccessModal(){
   const mR=objs.length>0?Math.ceil(mE*2)/2:0;
   const cantidad=Math.max(1,mR);
   const cantidadRedondeada=Math.ceil(cantidad*20)/20;
-  const cartUrl='https://dtftextil.es/carrito/?add-to-cart=267&quantity='+cantidadRedondeada.toFixed(2)+'&metros='+cantidadRedondeada.toFixed(2).replace('.',',');
-  document.getElementById('successCartBtn').href=cartUrl;
+  const productUrl='https://dtftextil.es/producto/dti-por-metros/?quantity='+cantidadRedondeada.toFixed(2);
+  document.getElementById('successCartBtn').href=productUrl;
   document.getElementById('successModal').classList.add('on');
 }
 
