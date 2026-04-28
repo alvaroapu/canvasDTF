@@ -452,8 +452,13 @@ function syncOverlay(){
 }
 syncOverlay();
 
-let proxTimer=null;
-function scheduleProx(){if(proxTimer)clearTimeout(proxTimer);proxTimer=setTimeout(checkProx,30)}
+let proxTimer=null,proxScheduled=false;
+function scheduleProx(){
+  if(proxScheduled)return;
+  proxScheduled=true;
+  if(proxTimer)cancelAnimationFrame(proxTimer);
+  proxTimer=requestAnimationFrame(()=>{checkProx();proxScheduled=false})
+}
 
 function checkProx(){
   syncOverlay();
@@ -709,19 +714,19 @@ function place(item,x,y){
 fc.on('selection:created',onSel);fc.on('selection:updated',onSel);
 fc.on('selection:cleared',()=>{document.getElementById('ctx').classList.remove('on');updTB();checkProx()});
 fc.on('before:transform',()=>{saveState()});
-fc.on('object:modified',()=>{updateStats();updateCtx();checkProx()});
+fc.on('object:modified',()=>{updateStats();updateCtx();scheduleProx()});
 fc.on('object:moving',e=>{
-  const o=e.target,b=o.getBoundingRect(true); // logical coords (no zoom)
+  const o=e.target,b=o.getBoundingRect(true);
   const logW=BW*SC;
   if(b.left<0) o.set('left',o.left-b.left);
   if(b.left+b.width>logW) o.set('left',o.left-(b.left+b.width-logW));
   if(b.top<0) o.set('top',o.top-b.top);
   grow((b.top+b.height)/SC+10);
-  updateCtx();scheduleProx();
+  updateCtx();
 });
-fc.on('object:scaling',()=>{scheduleProx();updateCtx()});
+fc.on('object:scaling',()=>{updateCtx();scheduleProx()});
 fc.on('mouse:dblclick',e=>{if(e.target&&!e.target._g)showResizeModal(e.target)});
-fc.on('mouse:up',()=>{checkProx()});
+fc.on('mouse:up',()=>{updateStats();checkProx()});
 function onSel(){const o=fc.getActiveObject();if(o&&!o._g){updTB(true);updateCtx()}}
 function updateCtx(){
   const o=fc.getActiveObject();if(!o||o._g){document.getElementById('ctx').classList.remove('on');return}
