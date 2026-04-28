@@ -124,6 +124,16 @@ body{font-family:var(--font-b);background:#e8e8e8;color:var(--g800);line-height:
 .rp-card.highlight{background:var(--red-light);border:1.5px solid var(--red)}
 .rp-card.highlight .rc-v{color:var(--red)}
 
+/* Bono recommendation */
+.bono-rec{background:var(--g100);border-radius:var(--radius);padding:14px;margin-top:4px}
+.bono-rec.active{background:var(--black);color:var(--white)}
+.bono-rec .br-title{font-family:var(--font-h);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.bono-rec.active .br-title{color:var(--red)}
+.bono-rec .br-name{font-family:var(--font-h);font-weight:800;font-size:1.1rem;margin-bottom:2px}
+.bono-rec .br-price{font-size:.82rem;margin-bottom:6px}
+.bono-rec .br-price b{color:var(--red);font-family:var(--font-h);font-weight:700}
+.bono-rec .br-detail{font-size:.7rem;opacity:.65;line-height:1.5}
+.bono-rec .br-empty{font-size:.78rem;color:var(--g400);text-align:center;padding:8px 0}
 
 /* Tips */
 .rp-tips{display:flex;flex-direction:column;gap:8px}
@@ -157,6 +167,10 @@ body{font-family:var(--font-b);background:#e8e8e8;color:var(--g800);line-height:
 .success-check{width:64px;height:64px;background:var(--green-light,#d4edda);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.8rem}
 .success-box h2{font-family:var(--font-h);font-weight:800;font-size:1.25rem;margin-bottom:6px;color:var(--black)}
 .success-box .s-sub{font-size:.85rem;color:var(--g600);margin-bottom:20px}
+.success-bono{background:var(--black);color:var(--white);border-radius:var(--radius);padding:18px;margin-bottom:16px;text-align:left}
+.success-bono .sb-tag{font-family:var(--font-h);font-weight:700;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--red);margin-bottom:6px}
+.success-bono .sb-name{font-family:var(--font-h);font-weight:800;font-size:1.1rem;margin-bottom:2px}
+.success-bono .sb-price{font-size:.85rem;margin-bottom:6px}.success-bono .sb-price b{color:var(--red)}
 .success-bono .sb-detail{font-size:.7rem;opacity:.6;line-height:1.5}
 .success-steps{text-align:left;margin-bottom:20px;padding:0 4px}
 .success-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:.8rem;color:var(--g700);line-height:1.5}
@@ -274,6 +288,13 @@ body{font-family:var(--font-b);background:#e8e8e8;color:var(--g800);line-height:
       </div>
     </div>
 
+    <div class="rp-sec">
+      <h3>Bono recomendado</h3>
+      <div class="bono-rec" id="bonoRec">
+        <div class="br-empty">Coloca piezas en el canvas<br>para ver la recomendación</div>
+      </div>
+    </div>
+
     <div class="rp-sec" style="flex:1">
       <h3>Consejos</h3>
       <div class="rp-tips">
@@ -332,10 +353,14 @@ body{font-family:var(--font-b);background:#e8e8e8;color:var(--g800);line-height:
     <h2>PDF descargado correctamente</h2>
     <p class="s-sub">Tu archivo de imposición está listo. Ahora adjúntalo a tu pedido en la tienda.</p>
 
+    <div class="success-bono" id="successBono">
+      <!-- filled dynamically -->
+    </div>
+
     <div class="success-steps">
-      <div class="success-step"><span class="ss-num">1</span><span>Haz clic en <b>"Ir a la tienda"</b> para acceder a nuestro servicio de impresión DTF por metros.</span></div>
-      <div class="success-step"><span class="ss-num">2</span><span>Sube tu PDF de imposición en el campo <b>"Adjuntar archivo"</b> y completa tu pedido.</span></div>
-      <div class="success-step"><span class="ss-num">3</span><span>Revisaremos tu montaje y lo imprimimos en 24h.</span></div>
+      <div class="success-step"><span class="ss-num">1</span><span>Haz clic en <b>"Ir a la tienda"</b> para abrir la página del bono recomendado.</span></div>
+      <div class="success-step"><span class="ss-num">2</span><span>Añade el bono al carrito y sube tu PDF de imposición en el campo <b>"Adjuntar archivo"</b>.</span></div>
+      <div class="success-step"><span class="ss-num">3</span><span>Completa tu pedido. Revisaremos tu montaje y lo imprimimos en 24h.</span></div>
     </div>
 
     <div class="success-actions">
@@ -357,7 +382,14 @@ body{font-family:var(--font-b);background:#e8e8e8;color:var(--g800);line-height:
 const BW=55,GAP=0.4,INIT_H=100,SC=8;
 let cH=INIT_H,lib=[],pend=null,uid=0,zoom=1,resizeTarget=null,showGrid=true,canvasBg='#ffffff';
 
-const TIENDA_DTI_URL='https://dtftextil.es/tienda/dti-por-metros/';
+/* Bonos DTF */
+const BONOS=[
+  {name:'Bono 10m',metros:10,metrosReales:12,precio:95,precioM:9.50,envios:'2 envíos gratis',url:'/tienda/bono-10m-dtf/'},
+  {name:'Bono 20m',metros:20,metrosReales:20,precio:180,precioM:9.00,envios:'4 envíos gratis',url:'/tienda/bono-20m-dtf/'},
+  {name:'Bono 50m',metros:50,metrosReales:50,precio:440,precioM:8.80,envios:'8 envíos gratis',url:'/tienda/bono-50m-dtf/'},
+  {name:'Bono 100m',metros:100,metrosReales:100,precio:860,precioM:8.60,envios:'15 envíos gratis',url:'/tienda/bono-100m-dtf/'},
+];
+const PRECIO_SUELTO=11.95;
 
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -871,7 +903,7 @@ document.querySelectorAll('.bg-sw').forEach(sw=>{
   });
 });
 
-/* ── Stats ── */
+/* ── Stats + Bono recommendation ── */
 function updateStats(){
   const objs=fc.getObjects().filter(o=>!o._g);const n=objs.length;
   let mb=0;objs.forEach(o=>{const b=o.getBoundingRect(true);if(b.top+b.height>mb)mb=b.top+b.height});
@@ -889,6 +921,34 @@ function updateStats(){
   document.getElementById('mgBar').style.width=pct+'%';
   document.getElementById('mgVal').textContent=mE.toFixed(2).replace('.',',')+' m usados';
   document.getElementById('mgMax').textContent=mR.toFixed(1).replace('.',',')+' m';
+  // Bono recommendation
+  updateBono(mR);
+}
+
+function updateBono(metros){
+  const box=document.getElementById('bonoRec');
+  if(metros<=0){box.className='bono-rec';box.innerHTML='<div class="br-empty">Coloca piezas en el canvas<br>para ver la recomendación</div>';return}
+  // Find smallest bono that covers
+  let rec=null;
+  for(const b of BONOS){if(b.metrosReales>=metros){rec=b;break}}
+  if(!rec) rec=BONOS[BONOS.length-1]; // 100m
+  const qty=Math.ceil(metros/rec.metrosReales);
+  const totalBono=rec.precio*qty;
+  const totalSuelto=metros*PRECIO_SUELTO;
+  const ahorro=totalSuelto-totalBono;
+  const pctAhorro=Math.round((ahorro/totalSuelto)*100);
+
+  box.className='bono-rec active';
+  box.innerHTML=`
+    <div class="br-title">Recomendado para ti</div>
+    <div class="br-name">${rec.name}${qty>1?' × '+qty:''}</div>
+    <div class="br-price"><b>${rec.precioM.toFixed(2).replace('.',',')} €/m</b> (+IVA)</div>
+    <div class="br-detail">
+      ${rec.metrosReales} metros${qty>1?' × '+qty+' = '+rec.metrosReales*qty+' m':''}<br>
+      ${rec.envios}<br>
+      ${ahorro>0?`<span style="color:var(--green)">Ahorras ${ahorro.toFixed(0)} € (${pctAhorro}%) vs metro suelto</span>`:''}
+    </div>
+  `;
 }
 
 function updateEmpty(){document.getElementById('em').style.display=fc.getObjects().filter(o=>!o._g).length?'none':'block'}
@@ -961,8 +1021,42 @@ document.getElementById('bExp2').addEventListener('click',doExport);
 
 /* ── Success Modal ── */
 function showSuccessModal(){
-  document.getElementById('successCTA').href=TIENDA_DTI_URL;
-  document.getElementById('successCTA').textContent='Ir a la tienda de impresión DTI';
+  const objs=fc.getObjects().filter(o=>!o._g);
+  let mb=0;objs.forEach(o=>{const b=o.getBoundingRect(true);if(b.top+b.height>mb)mb=b.top+b.height});
+  const mE=objs.length>0?mb/SC/100:0;
+  const mR=objs.length>0?Math.ceil(mE*2)/2:0;
+
+  // Find recommended bono
+  let rec=null;
+  for(const b of BONOS){if(b.metrosReales>=mR){rec=b;break}}
+  if(!rec)rec=BONOS[BONOS.length-1];
+  const qty=Math.ceil(mR/rec.metrosReales);
+  const totalSuelto=mR*PRECIO_SUELTO;
+  const totalBono=rec.precio*qty;
+  const ahorro=totalSuelto-totalBono;
+  const pctAhorro=totalSuelto>0?Math.round((ahorro/totalSuelto)*100):0;
+
+  const bonoBox=document.getElementById('successBono');
+  const storeBase='https://dtftextil.es';
+
+  if(mR>0){
+    bonoBox.style.display='block';
+    bonoBox.innerHTML=`
+      <div class="sb-tag">Recomendado para ${mR.toFixed(1).replace('.',',')} metros</div>
+      <div class="sb-name">${rec.name}${qty>1?' × '+qty:''}</div>
+      <div class="sb-price"><b>${rec.precioM.toFixed(2).replace('.',',')} €/m</b> (+IVA)</div>
+      <div class="sb-detail">
+        ${rec.metrosReales*qty} metros · ${rec.envios}${ahorro>0?'<br>Ahorras '+ahorro.toFixed(0)+' € ('+pctAhorro+'%) vs metro suelto':''}
+      </div>
+    `;
+    document.getElementById('successCTA').href=storeBase+rec.url;
+    document.getElementById('successCTA').textContent='Ir a la tienda — '+rec.name;
+  } else {
+    bonoBox.style.display='none';
+    document.getElementById('successCTA').href=storeBase+'/tienda/';
+    document.getElementById('successCTA').textContent='Ir a la tienda';
+  }
+
   document.getElementById('successModal').classList.add('on');
 }
 
