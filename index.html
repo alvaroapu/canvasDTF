@@ -515,15 +515,45 @@ uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('over');ha
 fi.addEventListener('change',e=>{handleF(e.target.files);fi.value=''});
 function handleF(files){for(const f of files){if(f.type==='image/png')procPNG(f);else if(f.type==='application/pdf')procPDF(f);else show('Solo .PNG y .PDF')}}
 
+function getPNGDpi(buf){
+  const v=new DataView(buf);
+  if(v.byteLength<12||v.getUint32(0)!==0x89504E47||v.getUint32(4)!==0x0D0A1A0A)return null;
+  let off=8;
+  while(off+12<=v.byteLength){
+    const len=v.getUint32(off);
+    const type=String.fromCharCode(v.getUint8(off+4),v.getUint8(off+5),v.getUint8(off+6),v.getUint8(off+7));
+    if(type==='pHYs'&&len>=9){
+      const xppu=v.getUint32(off+8),yppu=v.getUint32(off+12),unit=v.getUint8(off+16);
+      if(unit===1&&xppu>0&&yppu>0)return{x:Math.round(xppu*0.0254),y:Math.round(yppu*0.0254)};
+      return null;
+    }
+    if(type==='IDAT'||type==='IEND')break;
+    off+=12+len;
+  }
+  return null;
+}
+
 function procPNG(f){
   const r=new FileReader();
-  r.onload=e=>{const img=new Image();img.onload=()=>{
-    // Auto-trim transparent borders
-    const trimmed=trimTransparency(img);
-    pend={name:f.name.replace(/\.\w+$/,''),src:trimmed.src,nW:trimmed.w,nH:trimmed.h,origW:img.naturalWidth,origH:img.naturalHeight,isPDF:false};
-    showNewModal();
-  };img.src=e.target.result};
-  r.readAsDataURL(f);
+  r.onload=e=>{
+    const dpi=getPNGDpi(e.target.result);
+    const blob=new Blob([e.target.result],{type:'image/png'});
+    const url=URL.createObjectURL(blob);
+    const img=new Image();
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const trimmed=trimTransparency(img);
+      let physW=null,physH=null;
+      if(dpi&&dpi.x>=72&&dpi.y>=72){
+        physW=Math.round(trimmed.w/dpi.x*2.54*10)/10;
+        physH=Math.round(trimmed.h/dpi.y*2.54*10)/10;
+      }
+      pend={name:f.name.replace(/\.\w+$/,''),src:trimmed.src,nW:trimmed.w,nH:trimmed.h,origW:img.naturalWidth,origH:img.naturalHeight,isPDF:false,physW,physH};
+      showNewModal();
+    };
+    img.src=url;
+  };
+  r.readAsArrayBuffer(f);
 }
 function procPDF(f){
   const r=new FileReader();
@@ -635,7 +665,9 @@ function showNewModal(){
     label=pend.nW+'×'+pend.nH+' px';
   }
   document.getElementById('mNInfo').textContent=`"${pend.name}" — ${label}`;
-  let w=Math.min(25,BW),h=w/nAsp;if(h>100){h=100;w=h*nAsp}
+  let w,h;
+  if(pend.physW&&pend.physH){const s=Math.min(1,BW/pend.physW,100/pend.physH);w=pend.physW*s;h=pend.physH*s;}
+  else{w=Math.min(25,BW);h=w/nAsp;if(h>100){h=100;w=h*nAsp}}
   document.getElementById('mNW').value=Math.round(w*10)/10;
   document.getElementById('mNH').value=Math.round(h*10)/10;
   dpiUI(document.getElementById('mNDpi'),document.getElementById('mNDpiT'),pend.nW,pend.nH,w,h,pend.isPDF);
