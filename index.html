@@ -690,7 +690,7 @@ document.getElementById('mNew').addEventListener('click',e=>{if(e.target.id==='m
 /* ── Resize modal ── */
 let rAsp=1;
 function showResizeModal(obj){
-  resizeTarget=obj;const b=obj.getBoundingRect(true);const wCM=parseFloat((b.width/SC).toFixed(1)),hCM=parseFloat((b.height/SC).toFixed(1));
+  resizeTarget=obj;const wCM=parseFloat((obj.width*obj.scaleX/SC).toFixed(2)),hCM=parseFloat((obj.height*obj.scaleY/SC).toFixed(2));
   rAsp=wCM/hCM;const item=lib.find(i=>i.id===obj._did);
   const label=item?(item.isPDF?'Vectorial (PDF)':item.nW+'×'+item.nH+' px'):'';
   document.getElementById('mRInfo').textContent=`"${obj._dname}" — ${label}`;
