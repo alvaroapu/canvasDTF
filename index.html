@@ -566,7 +566,9 @@ function procPDF(f){
     removeWhiteBG(cv);
     // Auto-trim after removing white bg
     const trimmed=trimCanvas(cv);
-    pend={name:f.name.replace(/\.\w+$/,''),src:trimmed.src,nW:trimmed.w,nH:trimmed.h,origW:vp.width,origH:vp.height,isPDF:true};
+    const physW=Math.round(trimmed.w*2.54/216*10)/10;
+    const physH=Math.round(trimmed.h*2.54/216*10)/10;
+    pend={name:f.name.replace(/\.\w+$/,''),src:trimmed.src,nW:trimmed.w,nH:trimmed.h,origW:vp.width,origH:vp.height,isPDF:true,physW,physH};
     showNewModal();
   }catch(err){show('Error PDF: '+err.message)}};
   r.readAsArrayBuffer(f);
